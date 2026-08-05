@@ -1,9 +1,7 @@
 // 결과 리스트 DOM 렌더링. 판정 로직은 여기서 다루지 않는다.
 
-import { AXES, AXIS_LABEL, MEASURE_TARGET, MAX_MARGIN } from './constants.js';
+import { AXES, AXIS_LABEL, MEASURE_TARGET, MAX_MARGIN, DIMS_ACCURACY } from './constants.js';
 import { formatKRW, formatDims, formatGap, formatPack } from './format.js';
-
-const PLACEHOLDER_IMG = './assets/img/products/placeholder.svg';
 
 function el(tag, className, text) {
     const node = document.createElement(tag);
@@ -54,30 +52,30 @@ export function renderResults(root, summary, viewModel) {
 
 function renderCard(product, fit, input, isCheapest) {
     const item = el('li', 'card');
-
-    // ---- 썸네일 ----
-    const thumb = el('div', 'card__thumb');
-    const img = document.createElement('img');
-    img.src = product.imageUrl || PLACEHOLDER_IMG;
-    img.alt = '';
-    img.loading = 'lazy';
-    img.addEventListener('error', () => { img.src = PLACEHOLDER_IMG; }, { once: true });
-    thumb.append(img);
-
-    // ---- 본문 ----
     const body = el('div', 'card__body');
 
     const head = el('div', 'card__head');
     head.append(el('span', 'chip chip--seller', product.seller));
     if (isCheapest) head.append(el('span', 'chip chip--best', '최저가'));
     if (fit.swapped) head.append(el('span', 'chip chip--rotate', '↻ 회전 배치'));
-    if (fit.dimsEstimated) head.append(el('span', 'chip chip--estimate', '내치수 추정'));
+    if (!product.verified) head.append(el('span', 'chip chip--unverified', '미검증 데이터'));
     body.append(head);
 
     body.append(el('h3', 'card__name', product.name));
 
-    const dimsLabel = input.measureTarget === MEASURE_TARGET.ITEM ? '내치수' : '외치수';
+    const needInner = input.measureTarget === MEASURE_TARGET.ITEM;
+    const dimsLabel = needInner ? '내치수' : '외치수';
     body.append(el('p', 'card__dims', `${dimsLabel} ${formatDims(fit.usedDims)}`));
+
+    // 판정에 쓴 치수가 확실한 값인지 여기서 솔직하게 밝힌다.
+    if (fit.dimsAccuracy === DIMS_ACCURACY.UNKNOWN) {
+        body.append(el('p', 'card__warn',
+            `⚠ 판매처가 내치수/외치수를 표기하지 않아 위 값을 ${dimsLabel}로 간주했습니다.`));
+    } else if (fit.dimsAccuracy === DIMS_ACCURACY.CONVERTED) {
+        const source = needInner ? '외치수' : '내치수';
+        body.append(el('p', 'card__warn',
+            `${source} 표기를 벽 두께 ${product.wallThickness}mm 기준으로 환산한 값입니다.`));
+    }
 
     // ---- 축별 여유 ----
     const gapRow = el('div', 'gap-row');
@@ -101,13 +99,13 @@ function renderCard(product, fit, input, isCheapest) {
     body.append(price);
 
     // ---- 구매 링크 ----
-    const link = el('a', 'card__link', '구매처 보기');
+    const link = el('a', 'card__link', `${product.seller}에서 확인하기 ↗`);
     link.href = product.url;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     body.append(link);
 
-    item.append(thumb, body);
+    item.append(body);
     return item;
 }
 

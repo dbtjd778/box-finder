@@ -1,6 +1,8 @@
 // 데이터 접근 계층.
 // 지금은 로컬 JSON을 읽지만, 실제 판매처 API/크롤링으로 바뀌어도 이 파일만 교체하면 된다.
 
+import { DIMS_BASIS } from './constants.js';
+
 const DATA_URL = './data/products.json';
 
 let cache = null;
@@ -30,6 +32,8 @@ function normalize(product) {
         // unitPrice가 누락되면 묶음가에서 역산한다.
         unitPrice: Number(product.unitPrice) || Math.round(packPrice / packQty),
         wallThickness: Number(product.wallThickness) || 3,
-        inner: product.inner ?? null,
+        // 표기 기준과 검증 여부는 누락 시 "모른다"가 안전한 기본값이다.
+        dimsBasis: product.dimsBasis ?? DIMS_BASIS.UNKNOWN,
+        verified: product.verified === true,
     };
 }

@@ -322,29 +322,11 @@ input[type="range"] {
 }
 
 .card {
-    display: grid;
-    grid-template-columns: 76px 1fr;
-    gap: 12px;
-    padding: 13px;
+    padding: 14px;
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-}
-
-.card__thumb {
-    width: 76px;
-    height: 76px;
-    border-radius: var(--radius-sm);
-    background: #f0f2f7;
-    overflow: hidden;
-}
-
-.card__thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
 }
 
 .card__body { min-width: 0; }
@@ -367,7 +349,17 @@ input[type="range"] {
 .chip--seller { background: #eef1f6; color: var(--text-sub); }
 .chip--best   { background: var(--ok-soft); color: var(--ok); }
 .chip--rotate { background: var(--brand-soft); color: var(--brand-dark); }
-.chip--estimate { background: var(--warn-soft); color: var(--warn); }
+.chip--unverified { background: var(--warn-soft); color: var(--warn); }
+
+.card__warn {
+    margin-top: 6px;
+    padding: 7px 9px;
+    border-radius: 7px;
+    background: var(--warn-soft);
+    color: var(--warn);
+    font-size: 11.5px;
+    line-height: 1.45;
+}
 
 .card__name {
     font-size: 14.5px;
@@ -507,9 +499,6 @@ input[type="range"] {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
-
-    .card { grid-template-columns: 92px 1fr; }
-    .card__thumb { width: 92px; height: 92px; }
 }
 
 @media (min-width: 960px) {
@@ -537,5 +526,4 @@ input[type="range"] {
     .chip--seller { background: #262a35; }
     .gap { background: #232733; }
     .btn-reset { background: var(--surface); }
-    .card__thumb { background: #232733; }
 }

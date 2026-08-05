@@ -1,34 +1,43 @@
 // 규격 비교·판정 엔진.
 // DOM에 전혀 의존하지 않는 순수 함수만 둔다. (테스트 용이 / 추후 서버 이식 가능)
 
-import { MEASURE_TARGET, AXES, DEFAULT_MARGIN } from './constants.js';
-
-/**
- * 내치수(inner)가 없는 상품의 내치수를 벽 두께로 추정한다.
- * 가로/깊이는 양쪽 벽을, 높이는 바닥 한 면만 차감한다(뚜껑 없는 오픈형 기준).
- */
-function estimateInner({ outer, wallThickness = 3 }) {
-    return {
-        w: outer.w - wallThickness * 2,
-        d: outer.d - wallThickness * 2,
-        h: outer.h - wallThickness,
-    };
-}
+import {
+    MEASURE_TARGET, AXES, DEFAULT_MARGIN, DIMS_BASIS, DIMS_ACCURACY,
+} from './constants.js';
 
 /**
  * 측정 기준에 따라 '비교에 사용할 상품 치수'를 고른다.
  *
- *  - 옵션 A(물건을 쟀다) : 물건이 상자 "안"에 들어가야 하므로 내치수로 비교
- *  - 옵션 B(공간을 쟀다) : 상자가 선반 "안"에 들어가야 하므로 외치수로 비교
+ *  - 옵션 A(물건을 쟀다) : 물건이 상자 "안"에 들어가야 하므로 내치수가 필요
+ *  - 옵션 B(공간을 쟀다) : 상자가 선반 "안"에 들어가야 하므로 외치수가 필요
+ *
+ * 상품 데이터의 dimsBasis가 필요한 기준과 다르면 벽 두께로 환산하고,
+ * 표기 기준을 모르면(unknown) 값을 그대로 쓰되 신뢰도를 낮춰 표시한다.
+ * 조용히 추정해서 맞는 척하지 않는 것이 이 함수의 목적이다.
  */
-function pickComparableDims(product, measureTarget) {
-    if (measureTarget === MEASURE_TARGET.SPACE) {
-        return { dims: product.outer, estimated: false };
+function resolveDims(product, measureTarget) {
+    const { dims, dimsBasis = DIMS_BASIS.UNKNOWN, wallThickness = 3 } = product;
+    const needInner = measureTarget === MEASURE_TARGET.ITEM;
+    const neededBasis = needInner ? DIMS_BASIS.INNER : DIMS_BASIS.OUTER;
+
+    if (dimsBasis === neededBasis) {
+        return { dims, accuracy: DIMS_ACCURACY.EXACT };
     }
-    if (product.inner) {
-        return { dims: product.inner, estimated: false };
+    if (dimsBasis === DIMS_BASIS.UNKNOWN) {
+        return { dims, accuracy: DIMS_ACCURACY.UNKNOWN };
     }
-    return { dims: estimateInner(product), estimated: true };
+
+    // 표기 기준이 반대인 경우에만 환산한다.
+    // 가로/깊이는 양쪽 벽, 높이는 바닥 한 면만 반영(뚜껑 없는 오픈형 기준).
+    const sign = needInner ? -1 : 1;
+    return {
+        dims: {
+            w: dims.w + sign * wallThickness * 2,
+            d: dims.d + sign * wallThickness * 2,
+            h: dims.h + sign * wallThickness,
+        },
+        accuracy: DIMS_ACCURACY.CONVERTED,
+    };
 }
 
 /** margin을 숫자 하나로 받든 축별 객체로 받든 {w,d,h} 형태로 정규화 */
@@ -67,7 +76,7 @@ function calcGap(productSize, inputSize, measureTarget) {
  *   @param {boolean} [input.allowSwapWD=true]          가로/깊이 90° 회전 허용
  * @returns {{fits:boolean, gaps:object, failedAxes:string[], totalGap:number,
  *            tightestAxis:string, requiredMargin:number, swapped:boolean,
- *            dimsEstimated:boolean, usedDims:object}}
+ *            dimsAccuracy:string, usedDims:object}}
  */
 export function evaluateFit(product, input) {
     const {
@@ -78,7 +87,7 @@ export function evaluateFit(product, input) {
     } = input;
 
     const limit = normalizeMargin(margin);
-    const { dims, estimated } = pickComparableDims(product, measureTarget);
+    const { dims, accuracy } = resolveDims(product, measureTarget);
 
     // 높이(h)는 세워두는 방향이 정해져 있으므로 회전 대상에서 제외하고,
     // 평면상 가로/깊이만 90° 돌려본다.
@@ -126,7 +135,7 @@ export function evaluateFit(product, input) {
             tightestAxis,
             requiredMargin,
             swapped: orientation.swapped,
-            dimsEstimated: estimated,
+            dimsAccuracy: accuracy,
             usedDims: orientation.dims,
         };
 
