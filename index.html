@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#2f6bff">
+    <title>딱맞는박스 — 규격으로 찾는 택배상자·수납함</title>
+    <meta name="description" content="가로·깊이·높이만 입력하면 조건에 맞는 국내 택배상자와 수납함을 개당 단가 순으로 비교해 드립니다.">
+    <link rel="stylesheet" href="./assets/css/style.css?v=1">
+</head>
+<body>
+
+    <header class="app-header">
+        <h1 class="app-header__title">딱맞는박스</h1>
+        <p class="app-header__sub">규격만 넣으면 국내 판매처에서 딱 맞는 상자를 찾아드립니다</p>
+    </header>
+
+    <main class="app-main">
+
+        <!-- 1. 카테고리 탭 -->
+        <div class="tabs" role="tablist" aria-label="상품 카테고리">
+            <button type="button" class="tabs__btn is-active" role="tab"
+                    aria-selected="true" data-category="parcel">택배/포장 상자</button>
+            <button type="button" class="tabs__btn" role="tab"
+                    aria-selected="false" data-category="storage">수납함/리빙박스</button>
+        </div>
+
+        <form class="panel" id="search-form" novalidate>
+
+            <!-- 2. 측정 기준 -->
+            <fieldset class="field">
+                <legend class="field__label">무엇의 크기를 재셨나요?</legend>
+                <div class="choice">
+                    <label class="choice__item">
+                        <input type="radio" name="measure-target" value="item" checked>
+                        <span class="choice__box">
+                            <span class="choice__title">넣을 물건</span>
+                            <span class="choice__desc">물건보다 큰 상자 찾기</span>
+                        </span>
+                    </label>
+                    <label class="choice__item">
+                        <input type="radio" name="measure-target" value="space">
+                        <span class="choice__box">
+                            <span class="choice__title">들어갈 공간</span>
+                            <span class="choice__desc">선반에 들어가는 수납함 찾기</span>
+                        </span>
+                    </label>
+                </div>
+                <p class="guide" id="measure-guide"></p>
+            </fieldset>
+
+            <!-- 3. 규격 입력 -->
+            <fieldset class="field">
+                <legend class="field__label">규격 입력 <span class="field__unit">(mm)</span></legend>
+                <div class="dims">
+                    <label class="dims__item">
+                        <span class="dims__name">가로 W</span>
+                        <input type="number" id="input-w" inputmode="numeric" pattern="[0-9]*"
+                               min="1" max="2000" step="1" placeholder="0" autocomplete="off">
+                    </label>
+                    <label class="dims__item">
+                        <span class="dims__name">깊이 D</span>
+                        <input type="number" id="input-d" inputmode="numeric" pattern="[0-9]*"
+                               min="1" max="2000" step="1" placeholder="0" autocomplete="off">
+                    </label>
+                    <label class="dims__item">
+                        <span class="dims__name">높이 H</span>
+                        <input type="number" id="input-h" inputmode="numeric" pattern="[0-9]*"
+                               min="1" max="2000" step="1" placeholder="0" autocomplete="off">
+                    </label>
+                </div>
+                <p class="error-msg" id="input-error" role="alert"></p>
+            </fieldset>
+
+            <!-- 4. 여유 허용치 -->
+            <div class="field">
+                <div class="field__row">
+                    <label class="field__label" for="margin-range">허용 여유</label>
+                    <output class="field__output" id="margin-value" for="margin-range">30mm</output>
+                </div>
+                <input type="range" id="margin-range" min="0" max="100" step="5" value="30">
+                <p class="guide" id="margin-guide"></p>
+            </div>
+
+            <!-- 5. 회전 허용 -->
+            <label class="check">
+                <input type="checkbox" id="allow-swap" checked>
+                <span>가로/깊이를 90° 돌려서 넣는 것도 허용</span>
+            </label>
+
+            <button type="button" class="btn-reset" id="reset-btn">입력 초기화</button>
+        </form>
+
+        <!-- 6. 결과 -->
+        <section class="results" aria-live="polite">
+            <div class="results__head">
+                <h2 class="results__title">검색 결과</h2>
+                <div class="summary" id="summary"></div>
+            </div>
+            <div id="results"></div>
+        </section>
+
+        <p class="disclaimer">
+            표시되는 규격·가격은 로직 검증용 <strong>더미 데이터</strong>입니다. 실제 구매 전 판매처 상세페이지에서 치수와 가격을 반드시 확인해 주세요.
+        </p>
+
+    </main>
+
+    <script type="module" src="./src/js/main.js"></script>
+</body>
+</html>
