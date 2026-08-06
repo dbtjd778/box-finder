@@ -4,6 +4,9 @@ import { CATEGORY, MEASURE_TARGET, DEFAULT_MARGIN, MAX_INPUT_MM } from './consta
 import { findMatchingProducts, suggestMinimumMargin } from './fit.js';
 import { loadProducts } from './repository.js';
 import { renderResults } from './render.js';
+import {
+    readStateFromUrl, writeStateToUrl, clearUrlState, buildShareUrl,
+} from './urlState.js';
 
 const dom = {
     tabs: document.querySelector('.tabs'),
@@ -20,6 +23,7 @@ const dom = {
     marginGuide: document.getElementById('margin-guide'),
     allowSwap: document.getElementById('allow-swap'),
     resetBtn: document.getElementById('reset-btn'),
+    shareBtn: document.getElementById('share-btn'),
     summary: document.getElementById('summary'),
     results: document.getElementById('results'),
 };
@@ -90,9 +94,14 @@ function update() {
     dom.inputError.textContent = error;
 
     if (!size) {
+        dom.shareBtn.hidden = true;
+        clearUrlState();
         renderResults(dom.results, dom.summary, { status: 'idle' });
         return;
     }
+
+    dom.shareBtn.hidden = false;
+    writeStateToUrl(state, size);
 
     const input = buildInput(size);
     const matches = findMatchingProducts(state.products, input);
@@ -120,6 +129,20 @@ function debounce(fn, delay = 180) {
 
 const debouncedUpdate = debounce(update);
 
+/** state를 화면 컨트롤에 반영한다. URL로 복원할 때와 탭을 누를 때 같은 경로를 쓴다. */
+function syncControls() {
+    dom.tabs.querySelectorAll('.tabs__btn').forEach((tab) => {
+        const active = tab.dataset.category === state.category;
+        tab.classList.toggle('is-active', active);
+        tab.setAttribute('aria-selected', String(active));
+    });
+    dom.measureRadios.forEach((radio) => {
+        radio.checked = radio.value === state.measureTarget;
+    });
+    dom.marginRange.value = String(state.margin);
+    dom.allowSwap.checked = state.allowSwapWD;
+}
+
 // ---------------- 이벤트 바인딩 ----------------
 
 dom.tabs.addEventListener('click', (event) => {
@@ -127,11 +150,7 @@ dom.tabs.addEventListener('click', (event) => {
     if (!button) return;
 
     state.category = button.dataset.category;
-    dom.tabs.querySelectorAll('.tabs__btn').forEach((tab) => {
-        const active = tab === button;
-        tab.classList.toggle('is-active', active);
-        tab.setAttribute('aria-selected', String(active));
-    });
+    syncControls();
     update();
 });
 
@@ -162,6 +181,49 @@ dom.resetBtn.addEventListener('click', () => {
     update();
 });
 
+// ---------------- 결과 공유 ----------------
+
+let shareResetTimer;
+
+dom.shareBtn.addEventListener('click', async () => {
+    const { size } = readSize();
+    if (!size) return;
+
+    const url = buildShareUrl(state, size);
+    const ok = await copyText(url);
+
+    clearTimeout(shareResetTimer);
+    dom.shareBtn.textContent = ok ? '링크 복사됨 ✓' : '복사 실패 — 주소창을 복사해 주세요';
+    dom.shareBtn.classList.toggle('is-done', ok);
+    shareResetTimer = setTimeout(() => {
+        dom.shareBtn.textContent = '링크 복사';
+        dom.shareBtn.classList.remove('is-done');
+    }, 2000);
+});
+
+/** clipboard API는 보안 컨텍스트(https/localhost)에서만 동작해서 폴백을 둔다. */
+async function copyText(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        return true;
+    } catch {
+        try {
+            const helper = document.createElement('textarea');
+            helper.value = text;
+            helper.setAttribute('readonly', '');
+            helper.style.position = 'fixed';
+            helper.style.opacity = '0';
+            document.body.append(helper);
+            helper.select();
+            const ok = document.execCommand('copy');
+            helper.remove();
+            return ok;
+        } catch {
+            return false;
+        }
+    }
+}
+
 // 결과 영역의 "여유를 NNmm로 늘리기" 버튼 (동적으로 생성되므로 위임 처리)
 dom.results.addEventListener('click', (event) => {
     const button = event.target.closest('[data-action="apply-margin"]');
@@ -175,6 +237,16 @@ dom.results.addEventListener('click', (event) => {
 // ---------------- 초기화 ----------------
 
 (async function init() {
+    // 공유 링크로 들어온 경우 조건을 먼저 복원한다.
+    const { patch, size } = readStateFromUrl();
+    Object.assign(state, patch);
+    if (size) {
+        for (const [axis, input] of Object.entries(dom.inputs)) {
+            input.value = String(size[axis]);
+        }
+    }
+    syncControls();
+
     update(); // 데이터 로딩 전에도 안내 문구는 먼저 그린다
     try {
         state.products = await loadProducts();

@@ -298,6 +298,28 @@ input[type="range"] {
     margin-bottom: 12px;
 }
 
+.btn-share {
+    margin-left: auto;
+    flex: none;
+    padding: 7px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-sub);
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background .15s, color .15s, border-color .15s;
+}
+
+.btn-share:active { background: var(--bg); }
+
+.btn-share.is-done {
+    border-color: var(--ok);
+    background: var(--ok-soft);
+    color: var(--ok);
+}
+
 .results__title {
     font-size: 16px;
     font-weight: 800;

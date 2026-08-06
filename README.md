@@ -32,6 +32,25 @@ python -m http.server 8792
 # http://localhost:8792/index.html
 ```
 
+## 결과 공유 링크
+
+검색 조건이 URL 쿼리에 실린다. 새로고침해도 입력값이 남고, 링크를 그대로 보내면 상대가 같은 결과를 본다.
+
+```
+?cat=parcel&t=item&w=300&d=200&h=140&m=30&r=1
+```
+
+| 파라미터 | 의미 |
+|---|---|
+| `cat` | 카테고리 (`parcel` / `storage`) |
+| `t` | 측정 기준 (`item` = 옵션 A / `space` = 옵션 B) |
+| `w` `d` `h` | 규격 (mm) |
+| `m` | 허용 여유 (mm) |
+| `r` | 가로/깊이 회전 허용 (`1` / `0`) |
+
+`pushState`가 아니라 **`replaceState`**를 쓴다. 슬라이더를 움직일 때마다 뒤로가기 기록이 쌓이면 못 쓰기 때문이다.
+URL 값은 전부 범위 검증을 거치고, 유효하지 않으면 조용히 무시하고 기본값으로 떨어진다 (`urlState.js`).
+
 ## 폴더 구조
 
 ```
@@ -46,6 +65,7 @@ box-finder/
    ├─ constants.js             # CATEGORY / MEASURE_TARGET 등 상수
    ├─ fit.js                   # ★ 규격 판정 엔진 (순수 함수, DOM 의존 없음)
    ├─ repository.js            # 데이터 접근 계층 (추후 실제 API로 교체될 자리)
+   ├─ urlState.js              # 검색 조건 ↔ URL 쿼리 변환 (공유 링크)
    ├─ format.js                # 원화·치수 포맷
    └─ render.js                # 결과 카드 DOM 생성
 ```
@@ -98,4 +118,4 @@ box-finder/
 - [ ] 무인양품·다이소·한샘 규격 직접 확인 (`verified: false` 항목)
 - [ ] 우체국 박스 내치수/외치수 확정 → `dimsBasis` 갱신
 - [ ] 부피/무게 기반 택배 요금 비교
-- [ ] 결과 공유 링크 (URL 쿼리로 입력값 복원)
+- [x] 결과 공유 링크 (URL 쿼리로 입력값 복원)
