@@ -1,41 +1,37 @@
 // 규격 비교·판정 엔진.
 // DOM에 전혀 의존하지 않는 순수 함수만 둔다. (테스트 용이 / 추후 서버 이식 가능)
+//
+// 판정 규칙은 하나뿐이다: 넣을 물건보다 상자가 크거나 같아야 한다.
+//   gap = 상자 내치수 - 물건 치수
+//   gap < 0       → 안 들어감
+//   gap > margin  → 들어가긴 하지만 사용자가 정한 여유를 초과
 
-import {
-    MEASURE_TARGET, AXES, DEFAULT_MARGIN, DIMS_BASIS, DIMS_ACCURACY,
-} from './constants.js';
+import { AXES, DEFAULT_MARGIN, DIMS_BASIS, DIMS_ACCURACY } from './constants.js';
 import { calcPurchase } from './pricing.js';
 
 /**
- * 측정 기준에 따라 '비교에 사용할 상품 치수'를 고른다.
+ * 물건이 들어갈 '안쪽 치수'를 구한다.
  *
- *  - 옵션 A(물건을 쟀다) : 물건이 상자 "안"에 들어가야 하므로 내치수가 필요
- *  - 옵션 B(공간을 쟀다) : 상자가 선반 "안"에 들어가야 하므로 외치수가 필요
- *
- * 상품 데이터의 dimsBasis가 필요한 기준과 다르면 벽 두께로 환산하고,
- * 표기 기준을 모르면(unknown) 값을 그대로 쓰되 신뢰도를 낮춰 표시한다.
+ * 판매처가 외치수로 표기했으면 벽 두께만큼 깎고, 표기 기준을 모르면(unknown)
+ * 값을 그대로 쓰되 신뢰도를 낮춰 UI에 밝힌다.
  * 조용히 추정해서 맞는 척하지 않는 것이 이 함수의 목적이다.
  */
-function resolveDims(product, measureTarget) {
+function resolveInnerDims(product) {
     const { dims, dimsBasis = DIMS_BASIS.UNKNOWN, wallThickness = 3 } = product;
-    const needInner = measureTarget === MEASURE_TARGET.ITEM;
-    const neededBasis = needInner ? DIMS_BASIS.INNER : DIMS_BASIS.OUTER;
 
-    if (dimsBasis === neededBasis) {
+    if (dimsBasis === DIMS_BASIS.INNER) {
         return { dims, accuracy: DIMS_ACCURACY.EXACT };
     }
     if (dimsBasis === DIMS_BASIS.UNKNOWN) {
         return { dims, accuracy: DIMS_ACCURACY.UNKNOWN };
     }
 
-    // 표기 기준이 반대인 경우에만 환산한다.
-    // 가로/깊이는 양쪽 벽, 높이는 바닥 한 면만 반영(뚜껑 없는 오픈형 기준).
-    const sign = needInner ? -1 : 1;
+    // 외치수 표기 → 가로/깊이는 양쪽 벽, 높이는 바닥 한 면만 차감.
     return {
         dims: {
-            w: dims.w + sign * wallThickness * 2,
-            d: dims.d + sign * wallThickness * 2,
-            h: dims.h + sign * wallThickness,
+            w: dims.w - wallThickness * 2,
+            d: dims.d - wallThickness * 2,
+            h: dims.h - wallThickness,
         },
         accuracy: DIMS_ACCURACY.CONVERTED,
     };
@@ -50,29 +46,11 @@ function normalizeMargin(margin) {
 }
 
 /**
- * ★ 부호 스위칭이 일어나는 유일한 지점 ★
- *
- * gap을 "남는 여유 공간(mm)"으로 정의하면 A/B 모두 판정식이 0 <= gap <= margin 으로 통일된다.
- *
- *   옵션 A : gap = 상품(내치수) - 물건   → 상품이 커야 하므로 (상품 - 입력)
- *   옵션 B : gap = 공간 - 상품(외치수)   → 상품이 작아야 하므로 (입력 - 상품)
- *
- * gap < 0       → 안 들어감 (불합격)
- * gap > margin  → 들어가긴 하나 사용자가 정한 여유를 초과 (불합격)
- */
-function calcGap(productSize, inputSize, measureTarget) {
-    return measureTarget === MEASURE_TARGET.ITEM
-        ? productSize - inputSize
-        : inputSize - productSize;
-}
-
-/**
  * 단일 상품의 적합 여부를 판정한다.
  *
  * @param {object} product
  * @param {object} input
- *   @param {{w:number,d:number,h:number}} input.size   사용자 입력 규격 (mm)
- *   @param {string}  input.measureTarget               MEASURE_TARGET.ITEM | SPACE
+ *   @param {{w:number,d:number,h:number}} input.size   넣을 물건 규격 (mm)
  *   @param {number|object} [input.margin=30]           여유 허용치 (mm)
  *   @param {boolean} [input.allowSwapWD=true]          가로/깊이 90° 회전 허용
  * @returns {{fits:boolean, gaps:object, failedAxes:string[], totalGap:number,
@@ -80,15 +58,10 @@ function calcGap(productSize, inputSize, measureTarget) {
  *            dimsAccuracy:string, usedDims:object}}
  */
 export function evaluateFit(product, input) {
-    const {
-        size,
-        measureTarget,
-        margin = DEFAULT_MARGIN,
-        allowSwapWD = true,
-    } = input;
+    const { size, margin = DEFAULT_MARGIN, allowSwapWD = true } = input;
 
     const limit = normalizeMargin(margin);
-    const { dims, accuracy } = resolveDims(product, measureTarget);
+    const { dims, accuracy } = resolveInnerDims(product);
 
     // 높이(h)는 세워두는 방향이 정해져 있으므로 회전 대상에서 제외하고,
     // 평면상 가로/깊이만 90° 돌려본다.
@@ -109,7 +82,7 @@ export function evaluateFit(product, input) {
         const failedAxes = [];
 
         for (const axis of AXES) {
-            const gap = calcGap(orientation.dims[axis], size[axis], measureTarget);
+            const gap = orientation.dims[axis] - size[axis];
             gaps[axis] = gap;
             if (gap < 0 || gap > limit[axis]) failedAxes.push(axis);
         }
@@ -156,14 +129,13 @@ export function evaluateFit(product, input) {
 }
 
 /**
- * 카테고리 필터 → 적합도 판정 → 실구매 금액 최저순 정렬.
+ * 적합도 판정 → 실구매 금액 최저순 정렬.
  *
  * 정렬 기준이 개당 단가가 아니라 총 지불액인 이유는 pricing.js 주석 참고.
  * @returns {Array<{product:object, fit:object, purchase:object}>}
  */
 export function findMatchingProducts(products, input) {
     return products
-        .filter((product) => product.category === input.category)
         .map((product) => ({ product, fit: evaluateFit(product, input) }))
         .filter(({ fit }) => fit.fits)
         .map((match) => ({
@@ -171,7 +143,7 @@ export function findMatchingProducts(products, input) {
             purchase: calcPurchase(match.product, input.quantity),
         }))
         .sort((a, b) => {
-            // 1순위: 이번에 실제로 나가는 돈
+            // 1순위: 이번에 실제로 나가는 돈 (배송비 포함)
             const priceDiff = a.purchase.totalPrice - b.purchase.totalPrice;
             if (priceDiff !== 0) return priceDiff;
             // 2순위: 금액이 같으면 남는 수량이 적은 쪽
@@ -188,7 +160,6 @@ export function findMatchingProducts(products, input) {
  */
 export function suggestMinimumMargin(products, input) {
     const required = products
-        .filter((product) => product.category === input.category)
         .map((product) => evaluateFit(product, { ...input, margin: Infinity }).requiredMargin)
         .filter((value) => Number.isFinite(value));
 

@@ -72,35 +72,6 @@ button { font: inherit; cursor: pointer; }
     padding: 16px 16px calc(40px + env(safe-area-inset-bottom));
 }
 
-/* ---------------- 카테고리 탭 ---------------- */
-
-.tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    padding: 5px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    margin-bottom: 14px;
-}
-
-.tabs__btn {
-    padding: 11px 8px;
-    border: 0;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--text-sub);
-    font-size: 14px;
-    font-weight: 600;
-    transition: background .15s, color .15s;
-}
-
-.tabs__btn.is-active {
-    background: var(--brand);
-    color: #fff;
-}
-
 /* ---------------- 입력 패널 ---------------- */
 
 .panel {
@@ -147,56 +118,6 @@ button { font: inherit; cursor: pointer; }
 }
 
 .guide b { color: var(--text); }
-
-/* ---------------- 측정 기준 선택 ---------------- */
-
-.choice {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-top: 10px;
-}
-
-.choice__item { display: block; }
-
-.choice__item input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.choice__box {
-    display: block;
-    height: 100%;
-    padding: 12px 11px;
-    border: 1.5px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-    transition: border-color .15s, background .15s;
-}
-
-.choice__title {
-    display: block;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.choice__desc {
-    display: block;
-    margin-top: 2px;
-    font-size: 12px;
-    color: var(--text-mute);
-}
-
-.choice__item input:checked + .choice__box {
-    border-color: var(--brand);
-    background: var(--brand-soft);
-}
-
-.choice__item input:focus-visible + .choice__box {
-    outline: 2px solid var(--brand);
-    outline-offset: 2px;
-}
 
 /* ---------------- 규격 입력 ---------------- */
 

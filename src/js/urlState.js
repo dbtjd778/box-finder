@@ -1,15 +1,11 @@
 // 검색 조건을 URL 쿼리에 싣고 되읽는다.
 // 새로고침해도 입력값이 남고, 링크를 그대로 공유할 수 있다.
 //
-// 예) ?cat=parcel&t=item&w=300&d=200&h=140&m=30&r=1
+// 예) ?w=300&d=200&h=140&m=30&q=5&r=1
 
-import {
-    CATEGORY, MEASURE_TARGET, AXES, MAX_MARGIN, MAX_INPUT_MM, MAX_QTY,
-} from './constants.js';
+import { AXES, MAX_MARGIN, MAX_INPUT_MM, MAX_QTY } from './constants.js';
 
 const PARAM = {
-    category: 'cat',
-    measureTarget: 't',
     margin: 'm',
     quantity: 'q',
     allowSwapWD: 'r',
@@ -35,16 +31,6 @@ export function readStateFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const patch = {};
 
-    const category = params.get(PARAM.category);
-    if (Object.values(CATEGORY).includes(category)) {
-        patch.category = category;
-    }
-
-    const measureTarget = params.get(PARAM.measureTarget);
-    if (Object.values(MEASURE_TARGET).includes(measureTarget)) {
-        patch.measureTarget = measureTarget;
-    }
-
     const margin = parseInt_(params.get(PARAM.margin), 0, MAX_MARGIN);
     if (margin !== null) patch.margin = margin;
 
@@ -68,8 +54,6 @@ export function readStateFromUrl() {
 /** 공유용 절대 URL 문자열을 만든다. */
 export function buildShareUrl(state, size) {
     const params = new URLSearchParams();
-    params.set(PARAM.category, state.category);
-    params.set(PARAM.measureTarget, state.measureTarget);
     for (const axis of AXES) params.set(axis, String(size[axis]));
     params.set(PARAM.margin, String(state.margin));
     params.set(PARAM.quantity, String(state.quantity));

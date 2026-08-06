@@ -4,54 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#2f6bff">
-    <title>딱맞는박스 — 규격으로 찾는 택배상자·수납함</title>
-    <meta name="description" content="가로·깊이·높이만 입력하면 조건에 맞는 국내 택배상자와 수납함을 개당 단가 순으로 비교해 드립니다.">
-    <link rel="stylesheet" href="./assets/css/style.css?v=1">
+    <title>딱맞는박스 — 물건 크기로 찾는 택배상자</title>
+    <meta name="description" content="넣을 물건의 가로·깊이·높이만 입력하면 그 물건이 들어가는 국내 택배상자를 실구매 금액 순으로 비교해 드립니다.">
+    <link rel="stylesheet" href="./assets/css/style.css?v=2">
 </head>
 <body>
 
     <header class="app-header">
         <h1 class="app-header__title">딱맞는박스</h1>
-        <p class="app-header__sub">규격만 넣으면 국내 판매처에서 딱 맞는 상자를 찾아드립니다</p>
+        <p class="app-header__sub">넣을 물건 크기만 재면 딱 맞는 택배상자를 찾아드립니다</p>
     </header>
 
     <main class="app-main">
 
-        <!-- 1. 카테고리 탭 -->
-        <div class="tabs" role="tablist" aria-label="상품 카테고리">
-            <button type="button" class="tabs__btn is-active" role="tab"
-                    aria-selected="true" data-category="parcel">택배/포장 상자</button>
-            <button type="button" class="tabs__btn" role="tab"
-                    aria-selected="false" data-category="storage">수납함/리빙박스</button>
-        </div>
-
         <form class="panel" id="search-form" novalidate>
 
-            <!-- 2. 측정 기준 -->
+            <!-- 1. 물건 규격 입력 -->
             <fieldset class="field">
-                <legend class="field__label">무엇의 크기를 재셨나요?</legend>
-                <div class="choice">
-                    <label class="choice__item">
-                        <input type="radio" name="measure-target" value="item" checked>
-                        <span class="choice__box">
-                            <span class="choice__title">넣을 물건</span>
-                            <span class="choice__desc">물건보다 큰 상자 찾기</span>
-                        </span>
-                    </label>
-                    <label class="choice__item">
-                        <input type="radio" name="measure-target" value="space">
-                        <span class="choice__box">
-                            <span class="choice__title">들어갈 공간</span>
-                            <span class="choice__desc">선반에 들어가는 수납함 찾기</span>
-                        </span>
-                    </label>
-                </div>
-                <p class="guide" id="measure-guide"></p>
-            </fieldset>
-
-            <!-- 3. 규격 입력 -->
-            <fieldset class="field">
-                <legend class="field__label">규격 입력 <span class="field__unit">(mm)</span></legend>
+                <legend class="field__label">넣을 물건 크기 <span class="field__unit">(mm)</span></legend>
                 <div class="dims">
                     <label class="dims__item">
                         <span class="dims__name">가로 W</span>
@@ -69,10 +39,11 @@
                                min="1" max="2000" step="1" placeholder="0" autocomplete="off">
                     </label>
                 </div>
+                <p class="guide">물건보다 <b>크거나 같은</b> 상자만 보여드립니다. 물건보다 작은 상자는 제외됩니다.</p>
                 <p class="error-msg" id="input-error" role="alert"></p>
             </fieldset>
 
-            <!-- 3-1. 필요 수량 -->
+            <!-- 2. 필요 수량 -->
             <div class="field">
                 <label class="field__label" for="input-qty">필요 수량</label>
                 <div class="qty">
@@ -83,7 +54,7 @@
                 <p class="guide">묶음 단위로만 파는 상품이 많아, 이 수량 기준 <b>실제 지불 금액</b>으로 정렬합니다.</p>
             </div>
 
-            <!-- 4. 여유 허용치 -->
+            <!-- 3. 여유 허용치 -->
             <div class="field">
                 <div class="field__row">
                     <label class="field__label" for="margin-range">허용 여유</label>
@@ -93,7 +64,7 @@
                 <p class="guide" id="margin-guide"></p>
             </div>
 
-            <!-- 5. 회전 허용 -->
+            <!-- 4. 회전 허용 -->
             <label class="check">
                 <input type="checkbox" id="allow-swap" checked>
                 <span>가로/깊이를 90° 돌려서 넣는 것도 허용</span>
@@ -102,7 +73,7 @@
             <button type="button" class="btn-reset" id="reset-btn">입력 초기화</button>
         </form>
 
-        <!-- 6. 결과 -->
+        <!-- 5. 결과 -->
         <section class="results" aria-live="polite">
             <div class="results__head">
                 <h2 class="results__title">검색 결과</h2>
@@ -113,8 +84,7 @@
         </section>
 
         <p class="disclaimer">
-            우체국·박스포유 데이터는 판매처 공개 정보 기준이며, <strong>미검증</strong> 표시가 붙은 상품은 아직 확인되지 않았습니다.
-            가격과 규격은 수시로 바뀌니 구매 전 판매처 페이지에서 반드시 확인해 주세요.
+            규격·가격은 판매처 공개 정보 기준이며 수시로 바뀝니다. 구매 전 판매처 페이지에서 반드시 확인해 주세요.
         </p>
 
     </main>

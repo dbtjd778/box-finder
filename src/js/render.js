@@ -1,6 +1,6 @@
 // 결과 리스트 DOM 렌더링. 판정 로직은 여기서 다루지 않는다.
 
-import { AXES, AXIS_LABEL, MEASURE_TARGET, MAX_MARGIN, DIMS_ACCURACY } from './constants.js';
+import { AXES, AXIS_LABEL, MAX_MARGIN, DIMS_ACCURACY } from './constants.js';
 import { formatKRW, formatDims, formatGap, formatPack } from './format.js';
 
 function el(tag, className, text) {
@@ -13,7 +13,7 @@ function el(tag, className, text) {
 /**
  * @param {HTMLElement} root      결과가 그려질 컨테이너
  * @param {HTMLElement} summary   결과 건수/정렬 안내 영역
- * @param {object} viewModel      { status, matches, input, suggestedMargin, message }
+ * @param {object} viewModel      { status, matches, suggestedMargin, message }
  */
 export function renderResults(root, summary, viewModel) {
     root.replaceChildren();
@@ -24,8 +24,8 @@ export function renderResults(root, summary, viewModel) {
     if (status === 'idle') {
         root.append(emptyState(
             '📏',
-            viewModel.title ?? '규격을 입력해 주세요',
-            viewModel.message ?? '가로 · 깊이 · 높이를 mm 단위로 입력하면 조건에 맞는 상품을 찾아드립니다.'
+            viewModel.title ?? '물건 크기를 입력해 주세요',
+            viewModel.message ?? '가로 · 깊이 · 높이를 mm 단위로 입력하면 그 물건이 들어가는 상자를 찾아드립니다.'
         ));
         return;
     }
@@ -35,22 +35,12 @@ export function renderResults(root, summary, viewModel) {
         return;
     }
 
-    // 규격이 안 맞아서 0건인 것과, 애초에 등록된 상품이 없는 것은 다른 상황이다.
-    if (status === 'no-products') {
-        root.append(emptyState(
-            '📦',
-            '이 카테고리에 등록된 상품이 아직 없습니다',
-            '다른 탭을 확인해 주세요. 판매처 데이터가 확보되는 대로 추가됩니다.'
-        ));
-        return;
-    }
-
     if (status === 'empty') {
         root.append(renderNoMatch(viewModel));
         return;
     }
 
-    const { matches, input } = viewModel;
+    const { matches } = viewModel;
 
     summary.append(
         el('strong', 'summary__count', `${matches.length}개`),
@@ -59,12 +49,12 @@ export function renderResults(root, summary, viewModel) {
 
     const list = el('ul', 'card-list');
     matches.forEach(({ product, fit, purchase }, index) => {
-        list.append(renderCard(product, fit, purchase, input, index === 0));
+        list.append(renderCard(product, fit, purchase, index === 0));
     });
     root.append(list);
 }
 
-function renderCard(product, fit, purchase, input, isCheapest) {
+function renderCard(product, fit, purchase, isCheapest) {
     const item = el('li', 'card');
     const body = el('div', 'card__body');
 
@@ -76,19 +66,15 @@ function renderCard(product, fit, purchase, input, isCheapest) {
     body.append(head);
 
     body.append(el('h3', 'card__name', product.name));
-
-    const needInner = input.measureTarget === MEASURE_TARGET.ITEM;
-    const dimsLabel = needInner ? '내치수' : '외치수';
-    body.append(el('p', 'card__dims', `${dimsLabel} ${formatDims(fit.usedDims)}`));
+    body.append(el('p', 'card__dims', `내치수 ${formatDims(fit.usedDims)}`));
 
     // 판정에 쓴 치수가 확실한 값인지 여기서 솔직하게 밝힌다.
     if (fit.dimsAccuracy === DIMS_ACCURACY.UNKNOWN) {
         body.append(el('p', 'card__warn',
-            `⚠ 판매처가 내치수/외치수를 표기하지 않아 위 값을 ${dimsLabel}로 간주했습니다.`));
+            '⚠ 판매처가 내치수/외치수를 표기하지 않아 위 값을 내치수로 간주했습니다.'));
     } else if (fit.dimsAccuracy === DIMS_ACCURACY.CONVERTED) {
-        const source = needInner ? '외치수' : '내치수';
         body.append(el('p', 'card__warn',
-            `${source} 표기를 벽 두께 ${product.wallThickness}mm 기준으로 환산한 값입니다.`));
+            `외치수 표기를 벽 두께 ${product.wallThickness}mm 기준으로 환산한 값입니다.`));
     }
 
     // ---- 축별 여유 ----
@@ -104,10 +90,8 @@ function renderCard(product, fit, purchase, input, isCheapest) {
     });
     body.append(gapRow);
 
-    // ---- 가격 (실제 지불액 기준) ----
     body.append(renderPrice(product, purchase));
 
-    // ---- 구매 링크 ----
     const link = el('a', 'card__link', `${product.seller}에서 확인하기 ↗`);
     link.href = product.url;
     link.target = '_blank';
@@ -153,23 +137,20 @@ function renderPrice(product, purchase) {
     return wrap;
 }
 
-function renderNoMatch({ input, suggestedMargin }) {
+function renderNoMatch({ suggestedMargin }) {
     const wrap = el('div', 'empty');
     wrap.append(el('div', 'empty__icon', '🔍'));
-    wrap.append(el('h2', 'empty__title', '조건에 맞는 상품이 없습니다'));
-
-    const guide = input.measureTarget === MEASURE_TARGET.ITEM
-        ? '입력하신 물건보다 크면서 여유 범위 안에 드는 상자가 없습니다.'
-        : '입력하신 공간에 들어가면서 여유 범위 안에 드는 수납함이 없습니다.';
-    wrap.append(el('p', 'empty__desc', guide));
+    wrap.append(el('h2', 'empty__title', '조건에 맞는 상자가 없습니다'));
+    wrap.append(el('p', 'empty__desc',
+        '입력하신 물건보다 크면서 여유 범위 안에 드는 상자가 없습니다.'));
 
     if (suggestedMargin === null) {
-        wrap.append(el('p', 'empty__hint', '여유를 늘려도 맞는 상품이 없습니다. 규격이나 카테고리를 다시 확인해 주세요.'));
+        wrap.append(el('p', 'empty__hint', '여유를 늘려도 맞는 상자가 없습니다. 규격을 다시 확인해 주세요.'));
         return wrap;
     }
 
     if (suggestedMargin > MAX_MARGIN) {
-        wrap.append(el('p', 'empty__hint', `가장 근접한 상품도 ${suggestedMargin}mm 여유가 필요합니다. (슬라이더 최대 ${MAX_MARGIN}mm)`));
+        wrap.append(el('p', 'empty__hint', `가장 근접한 상자도 ${suggestedMargin}mm 여유가 필요합니다. (슬라이더 최대 ${MAX_MARGIN}mm)`));
         return wrap;
     }
 
