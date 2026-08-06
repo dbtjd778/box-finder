@@ -141,6 +141,11 @@ function renderPrice(product, purchase) {
         wrap.append(el('span', 'price__pack', detail));
     }
 
+    if (purchase.shipping > 0) {
+        wrap.append(el('span', 'price__pack',
+            `상품 ${formatKRW(purchase.goodsTotal)} + 배송비 ${formatKRW(purchase.shipping)}`));
+    }
+
     if (surplus > 0) {
         wrap.append(el('span', 'price__surplus', `⚠ ${surplus}개가 남습니다`));
     }
