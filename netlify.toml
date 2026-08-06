@@ -1,0 +1,35 @@
+# Netlify 배포 설정
+# 빌드 도구가 없는 순수 정적 사이트라 빌드 명령이 없다. 저장소 루트를 그대로 서빙한다.
+
+[build]
+  publish = "."
+  command = ""
+
+# ---------------------------------------------------------------------------
+# 캐시 정책
+#
+# GitHub Pages는 모든 파일에 max-age=600을 걸어서, index.html과 js가 따로 만료된다.
+# 그 탓에 '새 HTML + 옛 JS' 조합이 만들어져 스크립트가 통째로 죽는 사고가 있었다.
+# 여기서는 HTML과 JS를 항상 재검증하게 해서 그 조합 자체가 생기지 않게 한다.
+# ---------------------------------------------------------------------------
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/src/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# CSS는 파일명에 ?v= 를 붙여 관리하므로 조금 더 오래 두어도 안전하다.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
