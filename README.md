@@ -101,6 +101,18 @@ box-finder/
 | `packQty` / `packPrice` / `unitPrice` | 묶음 수량 / 묶음 가격 / 개당 단가 (KRW) |
 | `shippingFee` / `freeShippingOver` | 배송비 / 무료배송 기준 금액 (없으면 0 = 무료) |
 | `seller` / `url` / `note` | 판매처명 / 링크 / 비고 |
+| `partnersUrl` | 쿠팡 파트너스 추적 링크(`link.coupang.com/a/...`). 있으면 `url` 대신 이걸 쓴다 |
+
+### 쿠팡 파트너스 링크 넣는 법
+
+파트너스 대시보드 → **링크 생성 → 상품 링크**에서 상품 URL을 넣으면
+`https://link.coupang.com/a/XXXXX` 형태의 추적 링크가 나온다.
+그 값을 해당 상품의 `partnersUrl`에 넣으면 된다. 없는 상품은 원래 `url`로 폴백하므로
+한 번에 다 채우지 않아도 사이트는 정상 동작한다.
+
+공정위 고지 문구는 `index.html`의 결과 목록 바로 위(`.affiliate-notice`)와
+전 페이지 푸터에 있다. **숨기거나 접지 말 것** — 최종 승인 심사에서
+이 문구와 실제 파트너스 링크가 한 화면에 보이는 스크린샷을 요구한다.
 
 ## 데이터 수집 현황
 

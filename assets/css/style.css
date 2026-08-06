@@ -548,6 +548,20 @@ input[type="range"]:focus-visible {
     text-align: center;
 }
 
+/* ---------------- 제휴 고지 (공정위 필수 표시) ---------------- */
+
+.affiliate-notice {
+    margin-top: 22px;
+    padding: 11px 13px;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--brand);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: var(--surface);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-sub);
+}
+
 /* ---------------- 가이드 링크 카드 ---------------- */
 
 .guide-link {

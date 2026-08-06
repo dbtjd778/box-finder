@@ -93,7 +93,8 @@ function renderCard(product, fit, purchase, isCheapest) {
     body.append(renderPrice(product, purchase));
 
     const link = el('a', 'card__link', `${product.seller}에서 확인하기 ↗`);
-    link.href = product.url;
+    // 파트너스 링크가 등록된 상품은 그쪽을 우선한다. 없으면 원래 상품 주소로 폴백.
+    link.href = product.partnersUrl || product.url;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     body.append(link);
