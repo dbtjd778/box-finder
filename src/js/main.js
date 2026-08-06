@@ -107,6 +107,15 @@ function update() {
         return;
     }
 
+    // 데이터가 로드된 뒤에도 해당 카테고리에 상품이 하나도 없으면,
+    // 규격을 아무리 입력해도 소용없으므로 먼저 알린다.
+    const hasProducts = state.products.some((p) => p.category === state.category);
+    if (state.products.length > 0 && !hasProducts) {
+        dom.shareBtn.hidden = true;
+        renderResults(dom.results, dom.summary, { status: 'no-products' });
+        return;
+    }
+
     const { quantity, error: qtyError } = readQuantity();
     state.quantity = quantity ?? DEFAULT_QTY;
 

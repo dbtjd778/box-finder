@@ -35,6 +35,16 @@ export function renderResults(root, summary, viewModel) {
         return;
     }
 
+    // 규격이 안 맞아서 0건인 것과, 애초에 등록된 상품이 없는 것은 다른 상황이다.
+    if (status === 'no-products') {
+        root.append(emptyState(
+            '📦',
+            '이 카테고리에 등록된 상품이 아직 없습니다',
+            '다른 탭을 확인해 주세요. 판매처 데이터가 확보되는 대로 추가됩니다.'
+        ));
+        return;
+    }
+
     if (status === 'empty') {
         root.append(renderNoMatch(viewModel));
         return;
