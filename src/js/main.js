@@ -1,6 +1,8 @@
 // 진입점 — 상태 관리와 DOM 이벤트 바인딩만 담당한다.
 
-import { CATEGORY, MEASURE_TARGET, DEFAULT_MARGIN, MAX_INPUT_MM } from './constants.js';
+import {
+    CATEGORY, MEASURE_TARGET, DEFAULT_MARGIN, MAX_INPUT_MM, DEFAULT_QTY, MAX_QTY,
+} from './constants.js';
 import { findMatchingProducts, suggestMinimumMargin } from './fit.js';
 import { loadProducts } from './repository.js';
 import { renderResults } from './render.js';
@@ -17,6 +19,7 @@ const dom = {
         d: document.getElementById('input-d'),
         h: document.getElementById('input-h'),
     },
+    qty: document.getElementById('input-qty'),
     inputError: document.getElementById('input-error'),
     marginRange: document.getElementById('margin-range'),
     marginValue: document.getElementById('margin-value'),
@@ -32,6 +35,7 @@ const state = {
     category: CATEGORY.PARCEL,
     measureTarget: MEASURE_TARGET.ITEM,
     margin: DEFAULT_MARGIN,
+    quantity: DEFAULT_QTY,
     allowSwapWD: true,
     products: [],
     loadError: null,
@@ -68,12 +72,25 @@ function readSize() {
     return { size, error: '' };
 }
 
+/** 비어 있으면 1개로 본다. 범위를 벗어난 값만 오류로 취급. */
+function readQuantity() {
+    const raw = dom.qty.value.trim();
+    if (raw === '') return { quantity: DEFAULT_QTY, error: '' };
+
+    const value = Number(raw);
+    if (!Number.isInteger(value) || value < 1 || value > MAX_QTY) {
+        return { quantity: null, error: `수량은 1~${MAX_QTY}개 사이의 정수로 입력해 주세요.` };
+    }
+    return { quantity: value, error: '' };
+}
+
 function buildInput(size) {
     return {
         category: state.category,
         size,
         measureTarget: state.measureTarget,
         margin: state.margin,
+        quantity: state.quantity,
         allowSwapWD: state.allowSwapWD,
     };
 }
@@ -90,13 +107,22 @@ function update() {
         return;
     }
 
-    const { size, error } = readSize();
-    dom.inputError.textContent = error;
+    const { quantity, error: qtyError } = readQuantity();
+    state.quantity = quantity ?? DEFAULT_QTY;
 
-    if (!size) {
+    const { size, error } = readSize();
+    dom.inputError.textContent = error || qtyError;
+
+    if (!size || quantity === null) {
         dom.shareBtn.hidden = true;
         clearUrlState();
-        renderResults(dom.results, dom.summary, { status: 'idle' });
+        // 규격은 멀쩡한데 수량만 틀린 경우 "규격을 입력하세요"는 엉뚱한 안내가 된다.
+        const qtyOnly = size && quantity === null;
+        renderResults(dom.results, dom.summary, {
+            status: 'idle',
+            title: qtyOnly ? '필요 수량을 확인해 주세요' : undefined,
+            message: qtyOnly ? qtyError : undefined,
+        });
         return;
     }
 
@@ -141,6 +167,8 @@ function syncControls() {
     });
     dom.marginRange.value = String(state.margin);
     dom.allowSwap.checked = state.allowSwapWD;
+    // 수량 입력칸은 여기서 건드리지 않는다. 탭 전환 때마다 사용자가
+    // 입력 중이던 값을 덮어써 버리기 때문이다. 복원은 init에서만 한다.
 }
 
 // ---------------- 이벤트 바인딩 ----------------
@@ -161,7 +189,7 @@ dom.measureRadios.forEach((radio) => {
     });
 });
 
-Object.values(dom.inputs).forEach((input) => {
+[...Object.values(dom.inputs), dom.qty].forEach((input) => {
     input.addEventListener('input', debouncedUpdate);
 });
 
@@ -245,6 +273,7 @@ dom.results.addEventListener('click', (event) => {
             input.value = String(size[axis]);
         }
     }
+    dom.qty.value = String(state.quantity);
     syncControls();
 
     update(); // 데이터 로딩 전에도 안내 문구는 먼저 그린다

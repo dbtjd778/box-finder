@@ -4,13 +4,14 @@
 // 예) ?cat=parcel&t=item&w=300&d=200&h=140&m=30&r=1
 
 import {
-    CATEGORY, MEASURE_TARGET, AXES, MAX_MARGIN, MAX_INPUT_MM,
+    CATEGORY, MEASURE_TARGET, AXES, MAX_MARGIN, MAX_INPUT_MM, MAX_QTY,
 } from './constants.js';
 
 const PARAM = {
     category: 'cat',
     measureTarget: 't',
     margin: 'm',
+    quantity: 'q',
     allowSwapWD: 'r',
 };
 
@@ -47,6 +48,9 @@ export function readStateFromUrl() {
     const margin = parseInt_(params.get(PARAM.margin), 0, MAX_MARGIN);
     if (margin !== null) patch.margin = margin;
 
+    const quantity = parseInt_(params.get(PARAM.quantity), 1, MAX_QTY);
+    if (quantity !== null) patch.quantity = quantity;
+
     const rotate = params.get(PARAM.allowSwapWD);
     if (rotate === '0' || rotate === '1') patch.allowSwapWD = rotate === '1';
 
@@ -68,6 +72,7 @@ export function buildShareUrl(state, size) {
     params.set(PARAM.measureTarget, state.measureTarget);
     for (const axis of AXES) params.set(axis, String(size[axis]));
     params.set(PARAM.margin, String(state.margin));
+    params.set(PARAM.quantity, String(state.quantity));
     params.set(PARAM.allowSwapWD, state.allowSwapWD ? '1' : '0');
 
     const { origin, pathname } = window.location;

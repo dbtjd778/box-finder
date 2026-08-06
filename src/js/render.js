@@ -22,7 +22,11 @@ export function renderResults(root, summary, viewModel) {
     const { status } = viewModel;
 
     if (status === 'idle') {
-        root.append(emptyState('📏', '규격을 입력해 주세요', '가로 · 깊이 · 높이를 mm 단위로 입력하면 조건에 맞는 상품을 찾아드립니다.'));
+        root.append(emptyState(
+            '📏',
+            viewModel.title ?? '규격을 입력해 주세요',
+            viewModel.message ?? '가로 · 깊이 · 높이를 mm 단위로 입력하면 조건에 맞는 상품을 찾아드립니다.'
+        ));
         return;
     }
 
@@ -40,17 +44,17 @@ export function renderResults(root, summary, viewModel) {
 
     summary.append(
         el('strong', 'summary__count', `${matches.length}개`),
-        el('span', 'summary__text', '· 개당 단가 낮은 순')
+        el('span', 'summary__text', '· 실구매 금액 낮은 순')
     );
 
     const list = el('ul', 'card-list');
-    matches.forEach(({ product, fit }, index) => {
-        list.append(renderCard(product, fit, input, index === 0));
+    matches.forEach(({ product, fit, purchase }, index) => {
+        list.append(renderCard(product, fit, purchase, input, index === 0));
     });
     root.append(list);
 }
 
-function renderCard(product, fit, input, isCheapest) {
+function renderCard(product, fit, purchase, input, isCheapest) {
     const item = el('li', 'card');
     const body = el('div', 'card__body');
 
@@ -90,13 +94,8 @@ function renderCard(product, fit, input, isCheapest) {
     });
     body.append(gapRow);
 
-    // ---- 가격 ----
-    const price = el('div', 'card__price');
-    price.append(el('strong', 'price__unit', formatKRW(product.unitPrice)));
-    price.append(el('span', 'price__per', '/ 개'));
-    const pack = formatPack(product.packQty, product.packPrice);
-    if (pack) price.append(el('span', 'price__pack', pack));
-    body.append(price);
+    // ---- 가격 (실제 지불액 기준) ----
+    body.append(renderPrice(product, purchase));
 
     // ---- 구매 링크 ----
     const link = el('a', 'card__link', `${product.seller}에서 확인하기 ↗`);
@@ -107,6 +106,36 @@ function renderCard(product, fit, input, isCheapest) {
 
     item.append(body);
     return item;
+}
+
+/**
+ * 총 지불액을 크게 보여주고, 그 금액이 어떻게 나온 건지를 아래에 풀어 쓴다.
+ * 묶음 때문에 남는 수량이 생기면 그걸 숨기지 않는 것이 이 블록의 핵심이다.
+ */
+function renderPrice(product, purchase) {
+    const { quantity, packsNeeded, surplus, totalPrice, effectiveUnitPrice } = purchase;
+    const wrap = el('div', 'card__price');
+
+    wrap.append(el('strong', 'price__total', formatKRW(totalPrice)));
+
+    if (quantity > 1) {
+        wrap.append(el('span', 'price__per', `${quantity}개 기준`));
+        wrap.append(el('span', 'price__meta', `개당 ${formatKRW(effectiveUnitPrice)} 꼴`));
+    } else if (product.packQty > 1) {
+        wrap.append(el('span', 'price__meta', `개당 ${formatKRW(product.unitPrice)} 꼴`));
+    }
+
+    const pack = formatPack(product.packQty, product.packPrice);
+    if (pack) {
+        const detail = packsNeeded > 1 ? `${pack} × ${packsNeeded}세트` : pack;
+        wrap.append(el('span', 'price__pack', detail));
+    }
+
+    if (surplus > 0) {
+        wrap.append(el('span', 'price__surplus', `⚠ ${surplus}개가 남습니다`));
+    }
+
+    return wrap;
 }
 
 function renderNoMatch({ input, suggestedMargin }) {

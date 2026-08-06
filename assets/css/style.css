@@ -423,25 +423,77 @@ input[type="range"] {
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 4px 6px;
     margin-top: 10px;
 }
 
-.price__unit {
-    font-size: 18px;
+.price__total {
+    font-size: 19px;
     font-weight: 800;
     letter-spacing: -.02em;
 }
 
 .price__per {
-    font-size: 12px;
-    color: var(--text-mute);
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: #eef1f6;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-sub);
 }
 
-.price__pack {
+.price__meta {
+    font-size: 12.5px;
+    color: var(--text-sub);
+}
+
+.price__pack,
+.price__surplus {
     width: 100%;
     font-size: 12px;
-    color: var(--text-mute);
+}
+
+.price__pack { color: var(--text-mute); }
+.price__surplus { color: var(--warn); font-weight: 600; }
+
+/* 필요 수량 입력 */
+
+.qty {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 8px;
+}
+
+.qty input {
+    width: 110px;
+    padding: 11px 12px;
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: #fbfcfe;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+.qty input::-webkit-outer-spin-button,
+.qty input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.qty input:focus {
+    outline: none;
+    border-color: var(--brand);
+    background: #fff;
+}
+
+.qty__unit {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-sub);
 }
 
 .card__link {
@@ -543,9 +595,12 @@ input[type="range"] {
         --shadow: 0 1px 2px rgba(0, 0, 0, .4);
     }
 
-    .dims__item input { background: #232733; }
-    .dims__item input:focus { background: #262b38; }
-    .chip--seller { background: #262a35; }
+    .dims__item input,
+    .qty input { background: #232733; }
+    .dims__item input:focus,
+    .qty input:focus { background: #262b38; }
+    .chip--seller,
+    .price__per { background: #262a35; }
     .gap { background: #232733; }
     .btn-reset { background: var(--surface); }
 }

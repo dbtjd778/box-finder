@@ -23,14 +23,15 @@ export async function loadProducts() {
 /** 데이터 결손을 여기서 한 번에 방어한다. 렌더/판정 코드가 undefined를 신경 쓰지 않도록. */
 function normalize(product) {
     const packQty = Number(product.packQty) || 1;
-    const packPrice = Number(product.packPrice) || 0;
+    // 묶음가와 개당 단가 중 하나만 있어도 나머지를 채운다.
+    const unitPrice = Number(product.unitPrice) || 0;
+    const packPrice = Number(product.packPrice) || unitPrice * packQty;
 
     return {
         ...product,
         packQty,
         packPrice,
-        // unitPrice가 누락되면 묶음가에서 역산한다.
-        unitPrice: Number(product.unitPrice) || Math.round(packPrice / packQty),
+        unitPrice: unitPrice || Math.round(packPrice / packQty),
         wallThickness: Number(product.wallThickness) || 3,
         // 표기 기준과 검증 여부는 누락 시 "모른다"가 안전한 기본값이다.
         dimsBasis: product.dimsBasis ?? DIMS_BASIS.UNKNOWN,

@@ -4,6 +4,7 @@
 import {
     MEASURE_TARGET, AXES, DEFAULT_MARGIN, DIMS_BASIS, DIMS_ACCURACY,
 } from './constants.js';
+import { calcPurchase } from './pricing.js';
 
 /**
  * 측정 기준에 따라 '비교에 사용할 상품 치수'를 고른다.
@@ -155,19 +156,28 @@ export function evaluateFit(product, input) {
 }
 
 /**
- * 카테고리 필터 → 적합도 판정 → 개당 단가 최저가순 정렬.
- * @returns {Array<{product:object, fit:object}>}
+ * 카테고리 필터 → 적합도 판정 → 실구매 금액 최저순 정렬.
+ *
+ * 정렬 기준이 개당 단가가 아니라 총 지불액인 이유는 pricing.js 주석 참고.
+ * @returns {Array<{product:object, fit:object, purchase:object}>}
  */
 export function findMatchingProducts(products, input) {
     return products
         .filter((product) => product.category === input.category)
         .map((product) => ({ product, fit: evaluateFit(product, input) }))
         .filter(({ fit }) => fit.fits)
+        .map((match) => ({
+            ...match,
+            purchase: calcPurchase(match.product, input.quantity),
+        }))
         .sort((a, b) => {
-            // 1순위: 개당 단가 오름차순
-            const priceDiff = a.product.unitPrice - b.product.unitPrice;
+            // 1순위: 이번에 실제로 나가는 돈
+            const priceDiff = a.purchase.totalPrice - b.purchase.totalPrice;
             if (priceDiff !== 0) return priceDiff;
-            // 2순위: 단가가 같으면 더 딱 맞는(여유가 적은) 상품을 위로
+            // 2순위: 금액이 같으면 남는 수량이 적은 쪽
+            const surplusDiff = a.purchase.surplus - b.purchase.surplus;
+            if (surplusDiff !== 0) return surplusDiff;
+            // 3순위: 더 딱 맞는(여유가 적은) 상품을 위로
             return a.fit.totalGap - b.fit.totalGap;
         });
 }

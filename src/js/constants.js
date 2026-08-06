@@ -42,3 +42,6 @@ export const AXIS_LABEL = {
 export const DEFAULT_MARGIN = 30;   // 기본 여유 허용치 (mm)
 export const MAX_MARGIN = 100;      // 슬라이더 상한 (mm)
 export const MAX_INPUT_MM = 2000;   // 입력 가능한 최대 치수 (mm)
+
+export const DEFAULT_QTY = 1;       // 기본 필요 수량 (개)
+export const MAX_QTY = 999;         // 입력 가능한 최대 수량 (개)
