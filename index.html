@@ -6,7 +6,17 @@
     <meta name="theme-color" content="#2f6bff">
     <title>딱맞는박스 — 물건 크기로 찾는 택배상자</title>
     <meta name="description" content="넣을 물건의 가로·깊이·높이만 입력하면 그 물건이 들어가는 국내 택배상자를 실구매 금액 순으로 비교해 드립니다.">
-    <link rel="stylesheet" href="./assets/css/style.css?v=3">
+    <link rel="canonical" href="https://dbtjd778.github.io/box-finder/">
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="딱맞는박스">
+    <meta property="og:title" content="딱맞는박스 — 물건 크기로 찾는 택배상자">
+    <meta property="og:description" content="넣을 물건 크기만 재면 딱 맞는 택배상자를 실구매 금액 순으로 찾아드립니다.">
+    <meta property="og:url" content="https://dbtjd778.github.io/box-finder/">
+    <meta name="twitter:card" content="summary">
+
+    <link rel="stylesheet" href="./assets/css/style.css?v=4">
 </head>
 <body>
 
@@ -92,7 +102,24 @@
             규격·가격은 판매처 공개 정보 기준이며 수시로 바뀝니다. 구매 전 판매처 페이지에서 반드시 확인해 주세요.
         </p>
 
+        <a class="guide-link" href="./guide.html">
+            <span class="guide-link__title">📦 택배박스 고르는 법</span>
+            <span class="guide-link__desc">우체국 호수별 규격표, A골·B골 차이, 내치수와 외치수 구분법</span>
+        </a>
+
     </main>
+
+    <footer class="site-footer">
+        <nav class="site-footer__nav">
+            <a href="./">상자 찾기</a>
+            <a href="./guide.html">택배박스 가이드</a>
+            <a href="https://github.com/dbtjd778/box-finder" target="_blank" rel="noopener noreferrer">소스 · 문의</a>
+        </nav>
+        <p class="site-footer__desc">
+            딱맞는박스는 넣을 물건의 크기로 알맞은 택배상자를 찾아주는 비영리 도구입니다.
+            상품 정보는 판매처 공개 정보를 기준으로 하며, 판매나 결제는 취급하지 않습니다.
+        </p>
+    </footer>
 
     <!-- ?v= 는 필수. index.html과 js가 따로 캐시되면 새 HTML + 옛 JS 조합이 만들어져
          제거된 DOM을 참조하다 스크립트가 통째로 죽는다. 구조를 바꿀 때 같이 올릴 것. -->
