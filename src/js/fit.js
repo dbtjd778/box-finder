@@ -6,8 +6,8 @@
 //   gap < 0       → 안 들어감
 //   gap > margin  → 들어가긴 하지만 사용자가 정한 여유를 초과
 
-import { AXES, DEFAULT_MARGIN, DIMS_BASIS, DIMS_ACCURACY } from './constants.js';
-import { calcPurchase } from './pricing.js';
+import { AXES, DEFAULT_MARGIN, DIMS_BASIS, DIMS_ACCURACY } from './constants.js?v=3';
+import { calcPurchase } from './pricing.js?v=3';
 
 /**
  * 물건이 들어갈 '안쪽 치수'를 구한다.

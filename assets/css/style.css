@@ -105,9 +105,13 @@ button { font: inherit; cursor: pointer; }
 }
 
 .field__output {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--brand-soft);
     font-size: 15px;
     font-weight: 800;
-    color: var(--brand);
+    color: var(--brand-dark);
+    font-variant-numeric: tabular-nums;
 }
 
 .guide {
@@ -175,10 +179,75 @@ button { font: inherit; cursor: pointer; }
 
 /* ---------------- 슬라이더 / 체크박스 ---------------- */
 
+/* 기본 range는 손잡이가 작아 모바일에서 잡히지도, 움직이는 게 보이지도 않는다.
+   트랙과 손잡이를 직접 그리고 터치 타겟을 44px로 키운다. */
+
+.slider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.slider__end {
+    flex: none;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-mute);
+}
+
 input[type="range"] {
-    width: 100%;
-    height: 28px;
-    accent-color: var(--brand);
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--line);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 26px;
+    height: 26px;
+    margin-top: -10px;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    background: var(--brand);
+    box-shadow: 0 1px 5px rgba(20, 26, 45, .35);
+}
+
+input[type="range"]:active::-webkit-slider-thumb {
+    transform: scale(1.12);
+}
+
+input[type="range"]::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--line);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    background: var(--brand);
+    box-shadow: 0 1px 5px rgba(20, 26, 45, .35);
+}
+
+input[type="range"]:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 4px;
+    border-radius: 999px;
 }
 
 .check {
@@ -520,6 +589,9 @@ input[type="range"] {
     .qty input { background: #232733; }
     .dims__item input:focus,
     .qty input:focus { background: #262b38; }
+    .field__output { color: #a9c2ff; }
+    input[type="range"]::-webkit-slider-thumb,
+    input[type="range"]::-moz-range-thumb { border-color: var(--surface); }
     .chip--seller,
     .price__per { background: #262a35; }
     .gap { background: #232733; }

@@ -1,7 +1,7 @@
 // 결과 리스트 DOM 렌더링. 판정 로직은 여기서 다루지 않는다.
 
-import { AXES, AXIS_LABEL, MAX_MARGIN, DIMS_ACCURACY } from './constants.js';
-import { formatKRW, formatDims, formatGap, formatPack } from './format.js';
+import { AXES, AXIS_LABEL, MAX_MARGIN, DIMS_ACCURACY } from './constants.js?v=3';
+import { formatKRW, formatDims, formatGap, formatPack } from './format.js?v=3';
 
 function el(tag, className, text) {
     const node = document.createElement(tag);

@@ -1,7 +1,7 @@
 // 데이터 접근 계층.
 // 지금은 로컬 JSON을 읽지만, 실제 판매처 API/크롤링으로 바뀌어도 이 파일만 교체하면 된다.
 
-import { DIMS_BASIS } from './constants.js';
+import { DIMS_BASIS } from './constants.js?v=3';
 
 const DATA_URL = './data/products.json';
 

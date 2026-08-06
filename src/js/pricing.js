@@ -8,7 +8,7 @@
 // 배송비도 같은 이유로 포함한다. 낱개 60원짜리 박스에 배송비 2,800원이 붙으면
 // 개당 800원짜리 무료배송 상품보다 훨씬 비싸다.
 
-import { DEFAULT_QTY } from './constants.js';
+import { DEFAULT_QTY } from './constants.js?v=3';
 
 /**
  * 배송비를 구한다. freeShippingOver가 있으면 상품가 합계로 무료 여부를 판단한다.

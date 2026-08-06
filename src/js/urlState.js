@@ -3,7 +3,7 @@
 //
 // 예) ?w=300&d=200&h=140&m=30&q=5&r=1
 
-import { AXES, MAX_MARGIN, MAX_INPUT_MM, MAX_QTY } from './constants.js';
+import { AXES, MAX_MARGIN, MAX_INPUT_MM, MAX_QTY } from './constants.js?v=3';
 
 const PARAM = {
     margin: 'm',

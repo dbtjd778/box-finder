@@ -1,12 +1,12 @@
 // 진입점 — 상태 관리와 DOM 이벤트 바인딩만 담당한다.
 
-import { DEFAULT_MARGIN, MAX_INPUT_MM, DEFAULT_QTY, MAX_QTY } from './constants.js';
-import { findMatchingProducts, suggestMinimumMargin } from './fit.js';
-import { loadProducts } from './repository.js';
-import { renderResults } from './render.js';
+import { DEFAULT_MARGIN, MAX_INPUT_MM, DEFAULT_QTY, MAX_QTY } from './constants.js?v=3';
+import { findMatchingProducts, suggestMinimumMargin } from './fit.js?v=3';
+import { loadProducts } from './repository.js?v=3';
+import { renderResults } from './render.js?v=3';
 import {
     readStateFromUrl, writeStateToUrl, clearUrlState, buildShareUrl,
-} from './urlState.js';
+} from './urlState.js?v=3';
 
 const dom = {
     inputs: {
