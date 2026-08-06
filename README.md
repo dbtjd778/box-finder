@@ -2,7 +2,7 @@
 
 넣을 물건의 가로·깊이·높이만 입력하면, 그 물건이 들어가는 **국내 택배상자**를 실구매 금액 순으로 비교해 주는 웹서비스.
 
-🌐 **https://dbtjd778.github.io/box-finder/**
+🌐 **https://ttakmat-box.netlify.app/**
 
 ## 판정 규칙
 
@@ -116,7 +116,12 @@ box-finder/
 
 ## 배포
 
-`git push origin main` → GitHub Pages 자동 배포 (약 1분).
+`git push origin main` → **Netlify 자동 배포** (약 30초).
+
+빌드 도구가 없어 `netlify.toml`에서 루트를 그대로 서빙한다.
+캐시 정책도 여기서 정한다 — HTML·JS·데이터는 항상 재검증(`max-age=0, must-revalidate`)한다.
+GitHub Pages처럼 HTML과 JS가 따로 만료되면 '새 HTML + 옛 JS' 조합이 생겨
+이미 제거된 DOM을 참조하다 스크립트가 통째로 죽는 사고가 나기 때문이다.
 
 ## 남은 작업
 

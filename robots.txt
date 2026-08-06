@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dbtjd778.github.io/box-finder/sitemap.xml
+Sitemap: https://ttakmat-box.netlify.app/sitemap.xml
